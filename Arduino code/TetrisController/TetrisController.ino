@@ -1,9 +1,9 @@
-#include <WiFi.h>
+avas#include <WiFi.h>
 #include <PubSubClient.h>
 #define A 34
 #define B 35
 const char* ssid     = "MegaAeglane";
-const char* password = "Sahman10";
+const char* password = "KarlSööbJäätist";
 const char* mqtt_server = "192.168.1.214";
 
 
