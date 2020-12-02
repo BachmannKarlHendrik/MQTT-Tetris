@@ -15,14 +15,14 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.lang.Exception
 
 class GameActivity : AppCompatActivity() {
-    private val MQTT_BROKER_IP = "tcp://192.168.1.214:1883"
+    private val MQTT_BROKER_IP = "tcp://10.0.2.2:1883"
     val TAG = "MqttActivity"
     lateinit var mqttClient: MqttAndroidClient
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)// set up client
+        setContentView(R.layout.activity_game)// set up client
         this.supportActionBar?.hide()
         setupMqtt()
     }
@@ -45,7 +45,7 @@ class GameActivity : AppCompatActivity() {
             override fun connectComplete(reconnect: Boolean, serverURI: String?) {
                 Log.i(TAG, "MQTT Connected")
                 Toast.makeText(getApplicationContext(),"MQTT connected", Toast.LENGTH_SHORT).show()
-                mqttClient.subscribe("karl",0) //TODO setup mqtt
+                mqttClient.subscribe("Tetris",0) //TODO setup mqtt
             }
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
