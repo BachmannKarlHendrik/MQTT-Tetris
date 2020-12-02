@@ -9,7 +9,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_game.*
+import kotlinx.android.synthetic.main.activity_game.music_switch
+import kotlinx.android.synthetic.main.activity_game.pauseText
+import kotlinx.android.synthetic.main.activity_settings.*
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
@@ -20,6 +25,8 @@ class GameActivity : AppCompatActivity() {
     private val MQTT_BROKER_IP = "tcp://192.168.1.214:1883"
     val TAG = "MqttActivity"
     lateinit var mqttClient: MqttAndroidClient
+    private lateinit var model: GameViewModel
+    private lateinit var viewModelFactory: ViewModelFactory
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +34,8 @@ class GameActivity : AppCompatActivity() {
         setContentView(R.layout.activity_game)// set up client
         this.supportActionBar?.hide()
         setupMqtt()
+        viewModelFactory = ViewModelFactory()
+        model = ViewModelProvider(this,viewModelFactory).get(GameViewModel::class.java)
 
         pauseBtn.setOnClickListener {
             gamecanvas.isPaused = true
@@ -36,6 +45,21 @@ class GameActivity : AppCompatActivity() {
             gamecanvas.isPaused = false
             togglePauseScreen() }
         mainmenubtn.setOnClickListener { finish() }
+
+        music_switch.isChecked = model.getPlaySong()
+        music_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            model.setPlaySong(isChecked)
+            var player = model.getSongPlayer(applicationContext)
+            player?.let {
+                if(player.isPlaying && !isChecked){
+                    player.stop()
+                    model.nullPlayer()
+                }
+                else if(!player.isPlaying && isChecked){
+                    player.start()
+                }
+            }
+        }
     }
 
     private fun togglePauseScreen() {
@@ -43,12 +67,16 @@ class GameActivity : AppCompatActivity() {
             resumebtn.visibility = View.GONE
             mainmenubtn.visibility = View.GONE
             pauseText.visibility = View.GONE
+            music_switch.visibility = View.GONE
+            music_text.visibility = View.GONE
             pauseBtn.visibility = View.VISIBLE
         }
         else{
             resumebtn.visibility = View.VISIBLE
             mainmenubtn.visibility = View.VISIBLE
             pauseText.visibility = View.VISIBLE
+            music_switch.visibility = View.VISIBLE
+            music_text.visibility = View.VISIBLE
             pauseBtn.visibility = View.GONE
         }
     }
@@ -57,6 +85,13 @@ class GameActivity : AppCompatActivity() {
         if(mqttClient.isConnected) {
             mqttClient.disconnect()
         }
+        gamecanvas.isPaused = true
+        resumebtn.visibility = View.VISIBLE
+        mainmenubtn.visibility = View.VISIBLE
+        pauseText.visibility = View.VISIBLE
+        music_switch.visibility = View.VISIBLE
+        music_text.visibility = View.VISIBLE
+        pauseBtn.visibility = View.GONE
         super.onPause()
     }
 
@@ -98,5 +133,20 @@ class GameActivity : AppCompatActivity() {
     override fun onResume() {
         setupMqtt()
         super.onResume()
+    }
+
+
+    override fun onBackPressed() {
+        if(resumebtn.visibility == View.VISIBLE){
+            super.onBackPressed()
+        }
+        else{
+            gamecanvas.isPaused = true
+            resumebtn.visibility = View.VISIBLE
+            mainmenubtn.visibility = View.VISIBLE
+            pauseText.visibility = View.VISIBLE
+            pauseBtn.visibility = View.GONE
+        }
+
     }
 }
