@@ -88,7 +88,7 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     if(counter == 20){
                         counter = 0
                         score += 1
-                        activeDown()
+                        if (checkDown()) activeDown()
                     }
                     invalidate()
                 }
@@ -97,23 +97,59 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    private fun activeDown() {
+    private fun checkDown(): Boolean {
         var number: Int
-        var commit = true
         var downBlock: Int
-        loop@ for (i in pixelNrHeight.toInt() - 1 downTo 0){
+        for (i in pixelNrHeight.toInt() - 1 downTo 0){
             for (j in 0 until pixelNrWidth.toInt()){
                 number = matrix[i][j]
                 if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1){
                     downBlock = matrix[i+1][j]
                     if (downBlock != 0 && downBlock != activeBlockNr){
-                        commit = false
-                        break@loop
+                        return false
                     }
                 }
             }
         }
-        if (commit){
+        return true
+    }
+
+    private fun checkLeft(): Boolean {
+        var number: Int
+        var leftBlock: Int
+        for (i in 0 until pixelNrHeight.toInt()){
+            for (j in 0 until pixelNrWidth.toInt()){
+                number = matrix[i][j]
+                if (number == activeBlockNr && j != 0){
+                    leftBlock = matrix[i][j-1]
+                    if (leftBlock != 0 && leftBlock != activeBlockNr){
+                        return false
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    private fun checkRight(): Boolean {
+        var number: Int
+        var rightBlock: Int
+        for (i in 0 until pixelNrHeight.toInt()){
+            for (j in pixelNrWidth.toInt()-1 downTo 0){
+                number = matrix[i][j]
+                if (number == activeBlockNr && j != pixelNrWidth.toInt()-1){
+                    rightBlock = matrix[i][j+1]
+                    if (rightBlock != 0 && rightBlock != activeBlockNr){
+                        return false
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    private fun activeDown() {
+        var number: Int
             for (i in pixelNrHeight.toInt() - 1 downTo 0){
                 for (j in 0 until pixelNrWidth.toInt()){
                     number = matrix[i][j]
@@ -121,6 +157,31 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         matrix[i][j] = matrix[i+1][j]
                         matrix[i+1][j] = activeBlockNr
                     }
+                }
+            }
+    }
+
+    private fun activeLeft() {
+        var number: Int
+        for (i in 0 until pixelNrHeight.toInt()){
+            for (j in 0 until pixelNrWidth.toInt()){
+                number = matrix[i][j]
+                if (number == activeBlockNr && j != 0){
+                    matrix[i][j] = matrix[i][j-1]
+                    matrix[i][j-1] = activeBlockNr
+                }
+            }
+        }
+    }
+
+    private fun activeRight() {
+        var number: Int
+        for (i in 0 until pixelNrHeight.toInt()){
+            for (j in pixelNrWidth.toInt()-1 downTo 0){
+                number = matrix[i][j]
+                if (number == activeBlockNr && j != 9){
+                    matrix[i][j] = matrix[i][j+1]
+                    matrix[i][j+1] = activeBlockNr
                 }
             }
         }
@@ -157,86 +218,16 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             var number: Int
             var commit = true
             if (command == "Left"){//       LEFT
-                var leftBlock: Int
-                loop@ for (i in 0 until pixelNrHeight.toInt()){
-                    for (j in 0 until pixelNrWidth.toInt()){
-                        number = matrix[i][j]
-                        if (number == activeBlockNr && j != 0){
-                            leftBlock = matrix[i][j-1]
-                            if (leftBlock != 0 && leftBlock != activeBlockNr){
-                                commit = false
-                                break@loop
-                            }
-                        }
-                    }
-                }
-                if (commit){
-                    for (i in 0 until pixelNrHeight.toInt()){
-                        for (j in 0 until pixelNrWidth.toInt()){
-                            number = matrix[i][j]
-                            if (number == activeBlockNr && j != 0){
-                                matrix[i][j] = matrix[i][j-1]
-                                matrix[i][j-1] = activeBlockNr
-                            }
-                        }
-                    }
-                }
-
+                if (checkLeft()) activeLeft()
             }
             if (command == "Right") {//       RIGHT
-                var rightBlock: Int
-                loop@ for (i in 0 until pixelNrHeight.toInt()){
-                    for (j in pixelNrWidth.toInt()-1 downTo 0){
-                        number = matrix[i][j]
-                        if (number == activeBlockNr && j != pixelNrWidth.toInt()-1){
-                            rightBlock = matrix[i][j+1]
-                            if (rightBlock != 0 && rightBlock != activeBlockNr){
-                                commit = false
-                                break@loop
-                            }
-                        }
-                    }
-                }
-                if (commit){
-                    for (i in 0 until pixelNrHeight.toInt()){
-                        for (j in pixelNrWidth.toInt()-1 downTo 0){
-                            number = matrix[i][j]
-                            if (number == activeBlockNr && j != 9){
-                                matrix[i][j] = matrix[i][j+1]
-                                matrix[i][j+1] = activeBlockNr
-                            }
-                        }
-                    }
-                }
+                if (checkRight()) activeRight()
             }
             if (command == "Down") {//        DOWN
-                var downBlock: Int
-                loop@ for (i in pixelNrHeight.toInt() - 1 downTo 0){
-                    for (j in 0 until pixelNrWidth.toInt()){
-                        number = matrix[i][j]
-                        if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1){
-                            downBlock = matrix[i+1][j]
-                            if (downBlock != 0 && downBlock != activeBlockNr){
-                                commit = false
-                                break@loop
-                            }
-                        }
-                    }
-                }
-                if (commit){
-                    for (i in pixelNrHeight.toInt() - 1 downTo 0){
-                        for (j in 0 until pixelNrWidth.toInt()){
-                            number = matrix[i][j]
-                            if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1){
-                                matrix[i][j] = matrix[i+1][j]
-                                matrix[i+1][j] = activeBlockNr
-                            }
-                        }
-                    }
-                }
+                if (checkDown()) activeDown()
             }
             if (command == "Up") {
-
+                //if (canChange()) activeChange()
             }
         }
     }// remote
