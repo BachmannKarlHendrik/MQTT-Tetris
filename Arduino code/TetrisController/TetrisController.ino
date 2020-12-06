@@ -1,4 +1,4 @@
-avas#include <WiFi.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 #define A 34
 #define B 35
@@ -93,7 +93,8 @@ void loop() {
     lastCommand = "";
   }
   counter ++;
-  if((!command.equals(lastCommand) && !command.equals("")) || counter >= 500){
+  Serial.println(counter);
+  if((!command.equals(lastCommand) && !command.equals(""))){
     Serial.println((char*) command.c_str());
     lastCommand = command;
     counter = 0;

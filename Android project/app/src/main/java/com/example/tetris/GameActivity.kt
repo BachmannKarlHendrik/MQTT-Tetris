@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.activity_game.music_switch
 import kotlinx.android.synthetic.main.activity_game.pauseText
 import kotlinx.android.synthetic.main.activity_settings.*
+import kotlinx.coroutines.delay
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
@@ -22,7 +23,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.lang.Exception
 
 class GameActivity : AppCompatActivity() {
-    private val MQTT_BROKER_IP = "tcp://192.168.1.214:1883"
+    //private val MQTT_BROKER_IP = "tcp://192.168.1.214:1883" //phoneK
+    //private val MQTT_BROKER_IP = "tcp://192.168.1.196:1883" //phoneS
+    private val MQTT_BROKER_IP = "tcp://10.0.2.2:1883" //Emulaator
     val TAG = "MqttActivity"
     lateinit var mqttClient: MqttAndroidClient
     private lateinit var model: GameViewModel
@@ -32,18 +35,20 @@ class GameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)// set up client
-        this.supportActionBar?.hide()
-        setupMqtt()
+        supportActionBar?.hide()
         viewModelFactory = ViewModelFactory()
         model = ViewModelProvider(this,viewModelFactory).get(GameViewModel::class.java)
 
         pauseBtn.setOnClickListener {
             gamecanvas.isPaused = true
-            togglePauseScreen() }
+            togglePauseScreen()
+        }
 
         resumebtn.setOnClickListener {
             gamecanvas.isPaused = false
-            togglePauseScreen() }
+            togglePauseScreen()
+        }
+
         mainmenubtn.setOnClickListener { finish() }
 
         music_switch.isChecked = model.getPlaySong()
@@ -60,6 +65,11 @@ class GameActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        setupMqtt()
+        super.onResume()
     }
 
     private fun togglePauseScreen() {
@@ -104,7 +114,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun setupMqtt(){
-        mqttClient = MqttAndroidClient(this, MQTT_BROKER_IP, "lab11client")
+        mqttClient = MqttAndroidClient(this, MQTT_BROKER_IP, "TetrisProjectClient")
         mqttClient.setCallback(object : MqttCallbackExtended {
 
             override fun connectComplete(reconnect: Boolean, serverURI: String?) {
@@ -114,8 +124,11 @@ class GameActivity : AppCompatActivity() {
             }
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
-                Log.i(TAG, "MQTT Message: $topic, msg: ${message.toString()}")
-                gamecanvas.remote(message.toString())
+                if (topic == "Tetris"){
+                    Log.i(TAG, "MQTT Message: $topic, msg: ${message.toString()}")
+                    gamecanvas.remote(message.toString())
+
+                }
             }
 
             override fun connectionLost(cause: Throwable?) {
@@ -128,11 +141,6 @@ class GameActivity : AppCompatActivity() {
         })
 
         mqttClient.connect()
-    }
-
-    override fun onResume() {
-        setupMqtt()
-        super.onResume()
     }
 
 

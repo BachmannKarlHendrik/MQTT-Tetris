@@ -3,6 +3,7 @@ package com.example.tetris
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
+import kotlin.random.Random
 
 open class GameViewModel: ViewModel(){
     private var runningScore: Int = 0
@@ -19,7 +20,8 @@ open class GameViewModel: ViewModel(){
 
     fun getSongPlayer(context: Context): MediaPlayer?{
         if(mediaPlayer == null){
-            mediaPlayer = MediaPlayer.create(context,R.raw.themesong)
+            if (Random.nextDouble() > 0.98) mediaPlayer = MediaPlayer.create(context,R.raw.themesongfix)
+            else mediaPlayer = MediaPlayer.create(context,R.raw.beatboxfix) // easter egg
             mediaPlayer?.isLooping = true
             return mediaPlayer
         }
