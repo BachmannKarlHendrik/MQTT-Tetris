@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,11 +57,11 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         launchGameloop()
-        addPiece()
+        newPiece()
         super.onLayout(changed, left, top, right, bottom)
     }
 
-    private fun addPiece() {
+    private fun newPiece() {
         activeBlockNr += 1
         paintArray.add(getRandPaint())
 
@@ -89,6 +88,7 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         counter = 0
                         score += 1
                         if (checkDown()) activeDown()
+                        else newPiece()
                     }
                     invalidate()
                 }
@@ -97,7 +97,64 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+
+        var r: Rect
+        var number: Int
+        for (i in 0 until pixelNrHeight.toInt()) {
+            for (j in 0 until pixelNrWidth.toInt()) {
+                number = matrix[i][j]
+                if (number != 0){
+                    r = Rect(scalX(j), scalY(i), scalX(j+1), scalY(i+1))
+                    canvas?.drawRect(r, paintArray[number-1])
+                    canvas?.drawRect(r, borderPaint)
+               }
+            }
+        }
+
+        canvas?.drawText(score.toString(), 50F, 75F, bluePaint)
+    }
+
+
+
+
+
+
+
+
+
+
+    // ********************  REMOTE  ****************************
+
+
+    fun remote(command: String) {
+        if(!isPaused){ //So when the isPause is true, the block couldn't be moved.
+            if (command == "Left"){
+                if (checkLeft()) activeLeft()
+            }
+            if (command == "Right") {
+                if (checkRight()) activeRight()
+            }
+            if (command == "Down") {
+                if (checkDown()) {
+                    activeDown()
+                    score += 5
+                }
+            }
+            if (command == "Up") {
+                //if (canChange()) activeChange()
+            }
+        }
+    }// remote
+
+    // "Checks": Boolean functions, which return true/false depending of whether block can be moved to
+    //           designated direction without interference, or not.
+
     private fun checkDown(): Boolean {
+        if (matrix[15].contains(activeBlockNr)) return false
         var number: Int
         var downBlock: Int
         for (i in pixelNrHeight.toInt() - 1 downTo 0){
@@ -105,9 +162,7 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 number = matrix[i][j]
                 if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1){
                     downBlock = matrix[i+1][j]
-                    if (downBlock != 0 && downBlock != activeBlockNr){
-                        return false
-                    }
+                    if (downBlock != 0 && downBlock != activeBlockNr) return false
                 }
             }
         }
@@ -118,13 +173,12 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         var number: Int
         var leftBlock: Int
         for (i in 0 until pixelNrHeight.toInt()){
+            if (matrix[i][0] == activeBlockNr) return false
             for (j in 0 until pixelNrWidth.toInt()){
                 number = matrix[i][j]
                 if (number == activeBlockNr && j != 0){
                     leftBlock = matrix[i][j-1]
-                    if (leftBlock != 0 && leftBlock != activeBlockNr){
-                        return false
-                    }
+                    if (leftBlock != 0 && leftBlock != activeBlockNr) return false
                 }
             }
         }
@@ -135,30 +189,32 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         var number: Int
         var rightBlock: Int
         for (i in 0 until pixelNrHeight.toInt()){
+            if (matrix[i][matrix[0].size - 1] == activeBlockNr) return false
             for (j in pixelNrWidth.toInt()-1 downTo 0){
                 number = matrix[i][j]
                 if (number == activeBlockNr && j != pixelNrWidth.toInt()-1){
                     rightBlock = matrix[i][j+1]
-                    if (rightBlock != 0 && rightBlock != activeBlockNr){
-                        return false
-                    }
+                    if (rightBlock != 0 && rightBlock != activeBlockNr) return false
                 }
             }
         }
         return true
     }
 
+
+    // "Actives": void functions, which move the current active block to the destignated direction.
+
     private fun activeDown() {
         var number: Int
-            for (i in pixelNrHeight.toInt() - 1 downTo 0){
-                for (j in 0 until pixelNrWidth.toInt()){
-                    number = matrix[i][j]
-                    if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1){
-                        matrix[i][j] = matrix[i+1][j]
-                        matrix[i+1][j] = activeBlockNr
-                    }
+        for (i in pixelNrHeight.toInt() - 1 downTo 0){
+            for (j in 0 until pixelNrWidth.toInt()){
+                number = matrix[i][j]
+                if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1){
+                    matrix[i][j] = matrix[i+1][j]
+                    matrix[i+1][j] = activeBlockNr
                 }
             }
+        }
     }
 
     private fun activeLeft() {
@@ -186,50 +242,5 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
         }
     }
-
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        val randPaint = getRandPaint()
-        randPaint.textSize = 100F
-
-        var r: Rect
-        var number: Int
-        for (i in 0 until pixelNrHeight.toInt()) {
-            for (j in 0 until pixelNrWidth.toInt()) {
-                number = matrix[i][j]
-                if (number != 0){
-                    r = Rect(scalX(j), scalY(i), scalX(j+1), scalY(i+1))
-                    canvas?.drawRect(r, paintArray[number-1])
-                    canvas?.drawRect(r, borderPaint)
-               }
-            }
-        }
-
-        canvas?.drawText(score.toString(), 50F, 75F, bluePaint)
-    }
-
-
-
-    // ********************  REMOTE  ****************************
-
-
-    fun remote(command: String) {
-        if(!isPaused){ //So when the isPause is true, the block couldn't be moved.
-            var number: Int
-            var commit = true
-            if (command == "Left"){//       LEFT
-                if (checkLeft()) activeLeft()
-            }
-            if (command == "Right") {//       RIGHT
-                if (checkRight()) activeRight()
-            }
-            if (command == "Down") {//        DOWN
-                if (checkDown()) activeDown()
-            }
-            if (command == "Up") {
-                //if (canChange()) activeChange()
-            }
-        }
-    }// remote
 
 }
