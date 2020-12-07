@@ -20,7 +20,7 @@ open class GameViewModel: ViewModel(){
 
     fun getSongPlayer(context: Context): MediaPlayer?{
         if(mediaPlayer == null){
-            if (Random.nextDouble() > 0.98) mediaPlayer = MediaPlayer.create(context,R.raw.themesongfix)
+            if (Random.nextDouble() < 0.98) mediaPlayer = MediaPlayer.create(context,R.raw.themesongfix)
             else mediaPlayer = MediaPlayer.create(context,R.raw.beatboxfix) // easter egg
             mediaPlayer?.isLooping = true
             return mediaPlayer

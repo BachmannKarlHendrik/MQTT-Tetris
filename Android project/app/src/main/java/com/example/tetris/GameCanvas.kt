@@ -18,9 +18,12 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     val TAG = "MqttActivity"
 
     var isPaused = false
+    var gameOver = false
     var score = 0
     var activeBlockNr = 0
     var activeBlockCoords = arrayOf(0, 4)
+    var activeBlock = ""
+    val startBlockArray = arrayOf("I", "O", "T", "J", "L", "S", "Z")
     var paintArray: ArrayList<Paint> = ArrayList()
 
     private val pixelNrWidth = 10F
@@ -57,24 +60,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         launchGameloop()
-        newPiece()
         super.onLayout(changed, left, top, right, bottom)
     }
-
-    private fun newPiece() {
-        activeBlockNr += 1
-        paintArray.add(getRandPaint())
-
-        for (i in 0..1){
-            for (j in 4..5){
-                matrix[i][j] = activeBlockNr
-            }
-
-        }
-    }
-
-
-
 
     private fun launchGameloop() {
         val scope = CoroutineScope(Dispatchers.Default)
@@ -88,13 +75,83 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         counter = 0
                         score += 1
                         if (checkDown()) activeDown()
-                        else newPiece()
+                        else {
+                            activeBlockNr += 1
+                            scoringSequence()
+                            newPiece()
+                        }
                     }
                     invalidate()
                 }
 
             }// loop
         }
+    }
+
+    private fun scoringSequence() {
+        var count = 0
+        var added = 0
+        for (i in 0 until pixelNrHeight.toInt()) {
+            if (!matrix[i].contains(0)){
+                count += 1
+                added += count
+                for (j in i downTo 0){
+                    if (j == 0) matrix[j] = Array(pixelNrWidth.toInt()) {0}
+                    else matrix[j] = matrix[j-1]
+                }
+            }
+        }
+        score += added * 100
+    }
+
+    private fun newPiece() {
+        paintArray.add(getRandPaint())
+
+        val newBlock = Random.nextInt(0, startBlockArray.size)
+
+        if (newBlock == 0){
+            matrix[0][4] = activeBlockNr
+            matrix[0][5] = activeBlockNr
+            matrix[0][6] = activeBlockNr
+            matrix[0][7] = activeBlockNr
+        }
+        if (newBlock == 1){
+            matrix[0][4] = activeBlockNr
+            matrix[0][5] = activeBlockNr
+            matrix[1][4] = activeBlockNr
+            matrix[1][5] = activeBlockNr
+        }
+        if (newBlock == 2){
+            matrix[0][4] = activeBlockNr
+            matrix[0][5] = activeBlockNr
+            matrix[0][6] = activeBlockNr
+            matrix[1][5] = activeBlockNr
+        }
+        if (newBlock == 3){
+            matrix[0][5] = activeBlockNr
+            matrix[1][5] = activeBlockNr
+            matrix[2][5] = activeBlockNr
+            matrix[2][4] = activeBlockNr
+        }
+        if (newBlock == 4){
+            matrix[0][4] = activeBlockNr
+            matrix[1][4] = activeBlockNr
+            matrix[2][4] = activeBlockNr
+            matrix[2][5] = activeBlockNr
+        }
+        if (newBlock == 5){
+            matrix[0][5] = activeBlockNr
+            matrix[0][6] = activeBlockNr
+            matrix[1][4] = activeBlockNr
+            matrix[1][5] = activeBlockNr
+        }
+        if (newBlock == 6){
+            matrix[0][4] = activeBlockNr
+            matrix[0][5] = activeBlockNr
+            matrix[1][5] = activeBlockNr
+            matrix[1][6] = activeBlockNr
+        }
+        activeBlock = startBlockArray[newBlock]
     }
 
 
@@ -116,6 +173,9 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         canvas?.drawText(score.toString(), 50F, 75F, bluePaint)
+        if (gameOver) {
+            canvas?.drawText("Game over!", 50F, 125F, bluePaint)
+        }
     }
 
 
@@ -123,11 +183,11 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
 
 
+/*
+          ***************************  REMOTE  ****************************
+ */
 
 
-
-
-    // ********************  REMOTE  ****************************
 
 
     fun remote(command: String) {
