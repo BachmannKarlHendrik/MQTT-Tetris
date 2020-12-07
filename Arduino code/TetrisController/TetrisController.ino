@@ -2,9 +2,9 @@
 #include <PubSubClient.h>
 #define A 34
 #define B 35
-const char* ssid     = "MegaAeglane";
-const char* password = "KarlSööbJäätist";
-const char* mqtt_server = "192.168.1.214";
+const char* ssid     = "Telia-7DD6E7";
+const char* password = "GUFAT3N3PM";
+const char* mqtt_server = "192.168.1.196";
 
 
 WiFiClient wifiClient;
@@ -79,13 +79,13 @@ void loop() {
   if(y == 0){
     command = "Left";
   }
-  else if(x < 3000 && y > 3000){
+  else if(x < 3175 && y > 3175){
     command = "Right";
   }
   else if(x == 0){
     command = "Up";
   }
-  else if(x > 3000 && y < 3000){
+  else if(x > 3175 && y < 3175){
     command = "Down";
   }
   else{
@@ -93,7 +93,6 @@ void loop() {
     lastCommand = "";
   }
   counter ++;
-  Serial.println(counter);
   if((!command.equals(lastCommand) && !command.equals(""))){
     Serial.println((char*) command.c_str());
     lastCommand = command;

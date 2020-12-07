@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
+import android.widget.Button
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -20,23 +21,25 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var isPaused = false
     var gameOver = false
     var score = 0
+
     var activeBlockNr = 0
     var activeBlockCoords = arrayOf(0, 4)
     var activeBlock = ""
     var mutation = ""
     val startBlockArray = arrayOf("I", "O", "T", "J", "L", "S", "Z")
     var paintArray: ArrayList<Paint> = ArrayList()
-
     private val pixelNrWidth = 10F
+
+    lateinit var gameOverBtn: Button
+    fun sendButton(button: Button) {
+        gameOverBtn = button
+    }
+    
     private val pixelNrHeight = 16F
     var matrix = Array(pixelNrHeight.toInt()) {Array(pixelNrWidth.toInt()) {0} }
 
-
-
-    private fun getRandPaint(): Paint {
-        return Paint().apply {
-            color = Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))
-        }
+    private val whitePaint = Paint().apply{
+        color = Color.WHITE
     }
 
     private val bluePaint = Paint().apply {
@@ -48,6 +51,12 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         color = Color.DKGRAY
         style = Paint.Style.STROKE
         strokeWidth = 15F
+    }
+
+    private fun getRandPaint(): Paint {
+        return Paint().apply {
+            color = Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))
+        }
     }
 
     fun scalX(value: Int): Int {
@@ -68,8 +77,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             var counter = 0
-            while (true){
-                if(!isPaused) {
+            while (!gameOver){
+                if (!isPaused){
                     delay(50L) //So therefore we have 20 refreshes per second.
                     counter += 1
                     if(counter == 20){
@@ -110,6 +119,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val newBlock = startBlockArray[Random.nextInt(0, startBlockArray.size)]
 
         if (newBlock == "I"){
+            if (matrix[0][4] != 0 || matrix[0][5] != 0 || matrix[0][6] != 0 || matrix[0][7] != 0)
+                gameOver = true
             mutation = "I1"
             matrix[0][4] = activeBlockNr
             matrix[0][5] = activeBlockNr
@@ -117,6 +128,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             matrix[0][7] = activeBlockNr
         }
         else if (newBlock == "O"){
+            if (matrix[0][4] != 0 || matrix[0][5] != 0 || matrix[1][4] != 0 || matrix[1][5] != 0)
+                gameOver = true
             mutation = "O"
             matrix[0][4] = activeBlockNr
             matrix[0][5] = activeBlockNr
@@ -124,6 +137,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             matrix[1][5] = activeBlockNr
         }
         else if (newBlock == "T"){
+            if (matrix[0][5] != 0 || matrix[1][4] != 0 || matrix[1][5] != 0 || matrix[1][6] != 0)
+                gameOver = true
             mutation = "T1"
             matrix[0][5] = activeBlockNr
             matrix[1][4] = activeBlockNr
@@ -131,6 +146,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             matrix[1][6] = activeBlockNr
         }
         else if (newBlock == "J"){
+            if (matrix[0][5] != 0 || matrix[1][5] != 0 || matrix[2][5] != 0 || matrix[2][4] != 0)
+                gameOver = true
             mutation = "J1"
             matrix[0][5] = activeBlockNr
             matrix[1][5] = activeBlockNr
@@ -138,6 +155,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             matrix[2][4] = activeBlockNr
         }
         else if (newBlock == "L"){
+            if (matrix[0][5] != 0 || matrix[1][5] != 0 || matrix[2][5] != 0 || matrix[2][6] != 0)
+                gameOver = true
             mutation = "L1"
             matrix[0][5] = activeBlockNr
             matrix[1][5] = activeBlockNr
@@ -145,6 +164,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             matrix[2][6] = activeBlockNr
         }
         else if (newBlock == "S"){
+            if (matrix[0][5] != 0 || matrix[0][6] != 0 || matrix[1][4] != 0 || matrix[1][5] != 0)
+                gameOver = true
             mutation = "S1"
             matrix[0][5] = activeBlockNr
             matrix[0][6] = activeBlockNr
@@ -152,6 +173,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             matrix[1][5] = activeBlockNr
         }
         else if (newBlock == "Z"){
+            if (matrix[0][4] != 0 || matrix[0][5] != 0 || matrix[1][5] != 0 || matrix[1][6] != 0)
+                gameOver = true
             mutation = "Z1"
             matrix[0][4] = activeBlockNr
             matrix[0][5] = activeBlockNr
@@ -181,10 +204,24 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                }
             }
         }
+        canvas?.drawText("Score:", 50F, 95F, bluePaint)
+        canvas?.drawText(score.toString(), 50F, 200F, bluePaint)
 
-        canvas?.drawText(score.toString(), 50F, 75F, bluePaint)
+        if (isPaused && !gameOver){
+            r = Rect(0, scalY(5), width, scalY(11))
+            canvas?.drawRect(r, whitePaint)
+            canvas?.drawRect(r, borderPaint)
+            canvas?.drawText("Pause", 400F, 710F, bluePaint)
+            invalidate()
+        }
+
         if (gameOver) {
-            canvas?.drawText("Game over!", 50F, 125F, bluePaint)
+            r = Rect(0, scalY(4), width, scalY(12))
+            canvas?.drawRect(r, whitePaint)
+            canvas?.drawRect(r, borderPaint)
+            canvas?.drawText("Game over!", 300F, 550F, bluePaint)
+            canvas?.drawText("Score: $score", 300F, 670F, bluePaint)
+            gameOverBtn.performClick()
         }
     }
 
@@ -201,7 +238,7 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
             else if (command == "Down") {
                 if (checkDown()) {
                     activeDown()
-                    score += 5
+                    score += 2
                 }
             }
             else if (command == "Up") {

@@ -1,26 +1,18 @@
 package com.example.tetris
 
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.activity_game.music_switch
-import kotlinx.android.synthetic.main.activity_game.pauseText
-import kotlinx.android.synthetic.main.activity_settings.*
-import kotlinx.coroutines.delay
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import java.lang.Exception
 
 class GameActivity : AppCompatActivity() {
     //private val MQTT_BROKER_IP = "tcp://192.168.1.214:1883" //phoneK
@@ -39,17 +31,33 @@ class GameActivity : AppCompatActivity() {
         viewModelFactory = ViewModelFactory()
         model = ViewModelProvider(this,viewModelFactory).get(GameViewModel::class.java)
 
-        pauseBtn.setOnClickListener {
-            gamecanvas.isPaused = true
+
+        pause_btn.setOnClickListener {
+            game_canvas.isPaused = true
             togglePauseScreen()
         }
 
-        resumebtn.setOnClickListener {
-            gamecanvas.isPaused = false
+        resume_btn.setOnClickListener {
+            game_canvas.isPaused = false
             togglePauseScreen()
         }
 
-        mainmenubtn.setOnClickListener { finish() }
+        mainmenu_btn.setOnClickListener { finish() }
+
+        save_btn.setOnClickListener {
+            val name = name_edittext.text
+            //TODO: SaveToFirebase
+            finish()
+        }
+
+        cancel_btn.setOnClickListener{ finish() }
+
+
+        val gameoverBtn = findViewById<Button>(R.id.gameover_btn)
+        game_canvas.sendButton(gameoverBtn)
+        gameoverBtn.setOnClickListener {
+            gameOverSequence()
+        }
 
         music_switch.isChecked = model.getPlaySong()
         music_switch.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -73,35 +81,39 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun togglePauseScreen() {
-        if(resumebtn.visibility == View.VISIBLE){
-            resumebtn.visibility = View.GONE
-            mainmenubtn.visibility = View.GONE
-            pauseText.visibility = View.GONE
+        if(resume_btn.visibility == View.VISIBLE){
+            resume_btn.visibility = View.GONE
+            mainmenu_btn.visibility = View.GONE
             music_switch.visibility = View.GONE
             music_text.visibility = View.GONE
-            pauseBtn.visibility = View.VISIBLE
+            pause_btn.visibility = View.VISIBLE
         }
         else{
-            resumebtn.visibility = View.VISIBLE
-            mainmenubtn.visibility = View.VISIBLE
-            pauseText.visibility = View.VISIBLE
+            resume_btn.visibility = View.VISIBLE
+            mainmenu_btn.visibility = View.VISIBLE
             music_switch.visibility = View.VISIBLE
             music_text.visibility = View.VISIBLE
-            pauseBtn.visibility = View.GONE
+            pause_btn.visibility = View.GONE
         }
+    }
+
+    private fun gameOverSequence() {
+        pause_btn.visibility = View.GONE
+        name_edittext.visibility = View.VISIBLE
+        save_btn.visibility = View.VISIBLE
+        cancel_btn.visibility = View.VISIBLE
     }
 
     override fun onPause() {
         if(mqttClient.isConnected) {
             mqttClient.disconnect()
         }
-        gamecanvas.isPaused = true
-        resumebtn.visibility = View.VISIBLE
-        mainmenubtn.visibility = View.VISIBLE
-        pauseText.visibility = View.VISIBLE
+        game_canvas.isPaused = true
+        resume_btn.visibility = View.VISIBLE
+        mainmenu_btn.visibility = View.VISIBLE
         music_switch.visibility = View.VISIBLE
         music_text.visibility = View.VISIBLE
-        pauseBtn.visibility = View.GONE
+        pause_btn.visibility = View.GONE
         super.onPause()
     }
 
@@ -126,7 +138,7 @@ class GameActivity : AppCompatActivity() {
             override fun messageArrived(topic: String?, message: MqttMessage?) {
                 if (topic == "Tetris"){
                     Log.i(TAG, "MQTT Message: $topic, msg: ${message.toString()}")
-                    gamecanvas.remote(message.toString())
+                    game_canvas.remote(message.toString())
 
                 }
             }
@@ -145,15 +157,14 @@ class GameActivity : AppCompatActivity() {
 
 
     override fun onBackPressed() {
-        if(resumebtn.visibility == View.VISIBLE){
+        if(resume_btn.visibility == View.VISIBLE){
             super.onBackPressed()
         }
         else{
-            gamecanvas.isPaused = true
-            resumebtn.visibility = View.VISIBLE
-            mainmenubtn.visibility = View.VISIBLE
-            pauseText.visibility = View.VISIBLE
-            pauseBtn.visibility = View.GONE
+            game_canvas.isPaused = true
+            resume_btn.visibility = View.VISIBLE
+            mainmenu_btn.visibility = View.VISIBLE
+            pause_btn.visibility = View.GONE
         }
 
     }

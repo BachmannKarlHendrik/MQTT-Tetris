@@ -10,7 +10,7 @@ class ViewModelFactory() : ViewModelProvider.Factory {
         val hashMapViewModel = HashMap<String, ViewModel>()
 
         fun addViewModel(key: String, viewModel: ViewModel) {
-            hashMapViewModel.put(key, viewModel)
+            hashMapViewModel[key] = viewModel
         }
 
 
