@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    tools:context=".activity.MainActivity"
     android:background="#d4ebff">
 
     <ImageView
@@ -50,5 +50,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/settings" />
+
+    <EditText
+        android:id="@+id/ip_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_marginTop="32dp"
+        android:ems="10"
+        android:hint="MQTT broker IP:"
+        android:inputType="number|numberDecimal"
+        android:digits="0123456789."
+        android:maxLength="21"
+        android:textSize="25sp"
+        android:theme="@style/SwitchCompatTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/highscore"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "366206679040",
+    "project_id": "mqtt-tetris",
+    "storage_bucket": "mqtt-tetris.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366206679040:android:46a41501a7d9bd1e2200e5",
+        "android_client_info": {
+          "package_name": "com.example.tetris"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366206679040-e693evacbm8ice7pluvnhsf17qu7nrs2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvAeEPIllFU-uCy7s9T_N9uF5spdZuwjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366206679040-e693evacbm8ice7pluvnhsf17qu7nrs2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,15 +1,19 @@
-package com.example.tetris
+package com.example.tetris.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.SimpleAdapter
+import android.preference.PreferenceManager.getDefaultSharedPreferences
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
+import com.example.tetris.GameViewModel
+import com.example.tetris.R
+import com.example.tetris.ViewModelFactory
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var model:GameViewModel
+    private lateinit var model: GameViewModel
     private lateinit var viewModelFactory: ViewModelFactory
+    var TAG = SettingsActivity::class.qualifiedName
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,16 +21,14 @@ class SettingsActivity : AppCompatActivity() {
         this.supportActionBar?.hide()
         viewModelFactory = ViewModelFactory()
         model = ViewModelProvider(this,viewModelFactory).get(GameViewModel::class.java)
+        music_switch.isChecked = model.getPlaySong()
 
         music_switch.setOnCheckedChangeListener { buttonView, isChecked ->
             model.setPlaySong(isChecked)
-            var player = model.getSongPlayer(applicationContext)
-            player?.let {
-                if(player.isPlaying && !isChecked){
-                    player.stop()
-                    model.nullPlayer()
-                }
-            }
+            val editor = getDefaultSharedPreferences(applicationContext).edit()
+            editor.putBoolean("music",isChecked)
+            editor.commit()
+            Log.i(TAG,"Music setting switched and commited")
         }
     }
 }

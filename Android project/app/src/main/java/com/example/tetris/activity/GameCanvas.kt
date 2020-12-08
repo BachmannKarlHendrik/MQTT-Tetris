@@ -1,4 +1,4 @@
-package com.example.tetris
+package com.example.tetris.activity
 
 import android.content.Context
 import android.graphics.Canvas
@@ -16,7 +16,7 @@ import kotlin.random.Random
 
 class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    val TAG = "MqttActivity"
+    val TAG = "Game"
 
     var isPaused = false
     var gameOver = false
@@ -38,8 +38,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val pixelNrHeight = 16F
     var matrix = Array(pixelNrHeight.toInt()) {Array(pixelNrWidth.toInt()) {0} }
 
-    private val whitePaint = Paint().apply{
-        color = Color.WHITE
+    private val gridPaint = Paint().apply{
+        color = Color.LTGRAY
     }
 
     private val bluePaint = Paint().apply {
@@ -93,7 +93,6 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
                     invalidate()
                 }
-
             }// loop
         }
     }
@@ -191,10 +190,16 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        for (i in 0 until pixelNrWidth.toInt()){ //Draw the grid
+            canvas?.drawLine(scalX(i).toFloat(),0F, scalX(i).toFloat(), height.toFloat(),gridPaint)
+        }
+        for (i in 0 until pixelNrHeight.toInt()){
+            canvas?.drawLine(0F,scalY(i).toFloat(),width.toFloat(),scalY(i).toFloat(),gridPaint)
+        }
 
         var r: Rect
         var number: Int
-        for (i in 0 until pixelNrHeight.toInt()) {
+        for (i in 0 until pixelNrHeight.toInt()) { //Draw all the blocks
             for (j in 0 until pixelNrWidth.toInt()) {
                 number = matrix[i][j]
                 if (number != 0){
@@ -204,23 +209,9 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                }
             }
         }
-        canvas?.drawText("Score:", 50F, 95F, bluePaint)
+        canvas?.drawText("Score:", 50F, 95F, bluePaint) //Draw score
         canvas?.drawText(score.toString(), 50F, 200F, bluePaint)
-
-        if (isPaused && !gameOver){
-            r = Rect(0, scalY(5), width, scalY(11))
-            canvas?.drawRect(r, whitePaint)
-            canvas?.drawRect(r, borderPaint)
-            canvas?.drawText("Pause", 400F, 710F, bluePaint)
-            invalidate()
-        }
-
         if (gameOver) {
-            r = Rect(0, scalY(4), width, scalY(12))
-            canvas?.drawRect(r, whitePaint)
-            canvas?.drawRect(r, borderPaint)
-            canvas?.drawText("Game over!", 300F, 550F, bluePaint)
-            canvas?.drawText("Score: $score", 300F, 670F, bluePaint)
             gameOverBtn.performClick()
         }
     }
