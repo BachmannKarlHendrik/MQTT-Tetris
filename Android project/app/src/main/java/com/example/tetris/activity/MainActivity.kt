@@ -11,7 +11,6 @@ import com.example.tetris.GameViewModel
 import com.example.tetris.R
 import com.example.tetris.ViewModelFactory
 import com.example.tetris.activity.GameActivity.Companion.IP
-import com.google.firebase.FirebaseApp
 import kotlinx.android.synthetic.main.activity_main.*
 
 

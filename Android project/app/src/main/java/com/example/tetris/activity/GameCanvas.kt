@@ -31,15 +31,15 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var mutation = ""
     val startBlockArray = arrayOf("I", "O", "T", "J", "L", "S", "Z")
     var paintArray: ArrayList<Paint> = ArrayList()
-    private val pixelNrWidth = 10F
-
     lateinit var gameOverBtn: Button
+
     fun sendButton(button: Button) {
         gameOverBtn = button
     }
 
-    private val pixelNrHeight = 16F
-    var matrix = Array(pixelNrHeight.toInt()) { Array(pixelNrWidth.toInt()) { 0 } }
+    private val pixelNrWidth = 10
+    private val pixelNrHeight = 16
+    var matrix = Array(pixelNrHeight) { Array(pixelNrWidth) { 0 } }
 
     private val gridPaint = Paint().apply {
         color = Color.LTGRAY
@@ -63,11 +63,11 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun scalX(value: Int): Int {
-        return ((value.toFloat() / pixelNrWidth) * width).toInt()
+        return ((value.toFloat() / pixelNrWidth.toFloat()) * width).toInt()
     }
 
     fun scalY(value: Int): Int {
-        return ((value.toFloat() / pixelNrHeight) * height).toInt()
+        return ((value.toFloat() / pixelNrHeight.toFloat()) * height).toInt()
     }
 
 
@@ -103,12 +103,12 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun scoringSequence() {
         var count = 0
         var added = 0
-        for (i in 0 until pixelNrHeight.toInt()) {
+        for (i in 0 until pixelNrHeight) {
             if (!matrix[i].contains(0)) {
                 count += 1
                 added += count
                 for (j in i downTo 0) {
-                    if (j == 0) matrix[j] = Array(pixelNrWidth.toInt()) { 0 }
+                    if (j == 0) matrix[j] = Array(pixelNrWidth) { 0 }
                     else matrix[j] = matrix[j - 1]
                 }
             }
@@ -267,7 +267,7 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        for (i in 0 until pixelNrWidth.toInt()) { //Draw the grid
+        for (i in 0 until pixelNrWidth) { //Draw the grid
             canvas?.drawLine(
                 scalX(i).toFloat(),
                 0F,
@@ -276,14 +276,14 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 gridPaint
             )
         }
-        for (i in 0 until pixelNrHeight.toInt()) {
+        for (i in 0 until pixelNrHeight) {
             canvas?.drawLine(0F, scalY(i).toFloat(), width.toFloat(), scalY(i).toFloat(), gridPaint)
         }
 
         var r: Rect
         var number: Int
-        for (i in 0 until pixelNrHeight.toInt()) { //Draw all the blocks
-            for (j in 0 until pixelNrWidth.toInt()) {
+        for (i in 0 until pixelNrHeight) { //Draw all the blocks
+            for (j in 0 until pixelNrWidth) {
                 number = matrix[i][j]
                 if (number != 0) {
                     r = Rect(scalX(j), scalY(i), scalX(j + 1), scalY(i + 1))
@@ -330,10 +330,10 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (matrix[15].contains(activeBlockNr)) return false
         var number: Int
         var downBlock: Int
-        for (i in pixelNrHeight.toInt() - 1 downTo 0) {
-            for (j in 0 until pixelNrWidth.toInt()) {
+        for (i in pixelNrHeight - 1 downTo 0) {
+            for (j in 0 until pixelNrWidth) {
                 number = matrix[i][j]
-                if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1) {
+                if (number == activeBlockNr && i != pixelNrHeight - 1) {
                     downBlock = matrix[i + 1][j]
                     if (downBlock != 0 && downBlock != activeBlockNr) return false
                 }
@@ -345,9 +345,9 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun checkLeft(): Boolean {
         var number: Int
         var leftBlock: Int
-        for (i in 0 until pixelNrHeight.toInt()) {
+        for (i in 0 until pixelNrHeight) {
             if (matrix[i][0] == activeBlockNr) return false
-            for (j in 0 until pixelNrWidth.toInt()) {
+            for (j in 0 until pixelNrWidth) {
                 number = matrix[i][j]
                 if (number == activeBlockNr && j != 0) {
                     leftBlock = matrix[i][j - 1]
@@ -361,11 +361,11 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun checkRight(): Boolean {
         var number: Int
         var rightBlock: Int
-        for (i in 0 until pixelNrHeight.toInt()) {
+        for (i in 0 until pixelNrHeight) {
             if (matrix[i][matrix[0].size - 1] == activeBlockNr) return false
-            for (j in pixelNrWidth.toInt() - 1 downTo 0) {
+            for (j in pixelNrWidth - 1 downTo 0) {
                 number = matrix[i][j]
-                if (number == activeBlockNr && j != pixelNrWidth.toInt() - 1) {
+                if (number == activeBlockNr && j != pixelNrWidth - 1) {
                     rightBlock = matrix[i][j + 1]
                     if (rightBlock != 0 && rightBlock != activeBlockNr) return false
                 }
@@ -447,10 +447,10 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun activeDown() {
         var number: Int
-        for (i in pixelNrHeight.toInt() - 1 downTo 0) {
-            for (j in 0 until pixelNrWidth.toInt()) {
+        for (i in pixelNrHeight - 1 downTo 0) {
+            for (j in 0 until pixelNrWidth) {
                 number = matrix[i][j]
-                if (number == activeBlockNr && i != pixelNrHeight.toInt() - 1) {
+                if (number == activeBlockNr && i != pixelNrHeight - 1) {
                     matrix[i][j] = matrix[i + 1][j]
                     matrix[i + 1][j] = activeBlockNr
                 }
@@ -461,8 +461,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun activeLeft() {
         var number: Int
-        for (i in 0 until pixelNrHeight.toInt()) {
-            for (j in 0 until pixelNrWidth.toInt()) {
+        for (i in 0 until pixelNrHeight) {
+            for (j in 0 until pixelNrWidth) {
                 number = matrix[i][j]
                 if (number == activeBlockNr && j != 0) {
                     matrix[i][j] = matrix[i][j - 1]
@@ -475,8 +475,8 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun activeRight() {
         var number: Int
-        for (i in 0 until pixelNrHeight.toInt()) {
-            for (j in pixelNrWidth.toInt() - 1 downTo 0) {
+        for (i in 0 until pixelNrHeight) {
+            for (j in pixelNrWidth - 1 downTo 0) {
                 number = matrix[i][j]
                 if (number == activeBlockNr && j != 9) {
                     matrix[i][j] = matrix[i][j + 1]
