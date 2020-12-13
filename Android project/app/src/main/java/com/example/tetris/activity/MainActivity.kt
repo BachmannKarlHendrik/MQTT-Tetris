@@ -43,10 +43,11 @@ class MainActivity : AppCompatActivity() {
             if(containsLetters){
                 Toast.makeText(applicationContext,"IP cannot contain letters!", Toast.LENGTH_SHORT).show()
             }
-            else if(ip_edittext.toString() == ""){
+            else if(ip_edittext.text.isEmpty()){
                 Toast.makeText(applicationContext,"IP cannot be empty!", Toast.LENGTH_SHORT).show()
             }
             else{
+                Log.i(TAG,ip_edittext.text.toString())
                 Intent(
                     this,
                     GameActivity::class.java

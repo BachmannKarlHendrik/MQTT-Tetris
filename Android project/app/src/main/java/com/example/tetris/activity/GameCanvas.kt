@@ -249,7 +249,6 @@ class GameCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 matrix[1][6] = activeBlockNr
             }
         }
-        Log.i(TAG, Arrays.toString(matrix[0]))
         activeBlock = newBlock
         activeBlockCoords[0] = 0
         activeBlockCoords[1] = 4

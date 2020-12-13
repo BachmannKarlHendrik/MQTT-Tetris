@@ -8,4 +8,8 @@
     <string name="resume">Resume</string>
     <string name="pause">Pause</string>
     <string name="main_menu">Main menu</string>
+    <plurals name="score">
+        <item quantity="one">There is %d score in total</item>
+        <item quantity="other">There is %d scores in total</item>
+    </plurals>
 </resources>

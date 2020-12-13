@@ -70,6 +70,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     }
                 }
                 scoresAdapter.notifyDataSetChanged()
+                inTotal_text.text = resources.getQuantityString(R.plurals.score,model.scoreArray.size,model.scoreArray.size)
             }
 
 
